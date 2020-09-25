@@ -3,6 +3,7 @@ import backgroundImage from './assets/background.jpg';
 import Player from './Player';
 import Rocket from './Rocket';
 import {SCREEN_SIZE, MOVE_SPEED} from './constants';
+import Enemy from './Enemy';
 
 
 const appSettings = {
@@ -13,6 +14,7 @@ const appSettings = {
 const app = new PIXI.Application(appSettings);
 const pressedKeys: {[key: string]: boolean} = {};
 const rockets: Rocket[] = [];
+const enemies: Enemy[] = [];
 let shootWithSpace = false;
 
 const keyDown = (e: KeyboardEvent) => {
@@ -48,8 +50,17 @@ app.stage.interactive = true;
 app.stage.on('pointermove', (e: PIXI.InteractionEvent) => player.followMouse(e));
 app.stage.on('pointerdown', fireRocket);
 
-window.addEventListener('keydown', keyDown)
-window.addEventListener('keyup', keyUp)
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+
+setInterval(() => {
+    const enemy = new Enemy();
+    enemies.push(enemy);
+    app.stage.addChild(enemy.enemy);
+    enemies.forEach((enemy) => {
+        enemy.changeDirection();
+    })
+}, 2000)
 
 const moveBg = () => {
     if (backgroundSprite.x < (backgroundSprite.texture.width - appSettings.width) * -1) {
@@ -92,8 +103,19 @@ const rocketHandler = (delta: any) => {
     });
 }
 
+const enemyHandler = (delta: number) => {
+    enemies.forEach((enemy, idx) => {
+        enemy.move();
+        if (enemy.enemy.x < 0) {
+            app.stage.removeChild(enemy.enemy);
+            enemies.splice(idx, 1);
+        }
+    })
+}
+
 app.ticker.add(moveBg);
 app.ticker.add(keyboardActions);
 app.ticker.add(rocketHandler);
+app.ticker.add(enemyHandler);
 
 app.renderer.render(app.stage);

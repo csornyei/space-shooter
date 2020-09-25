@@ -10,10 +10,9 @@ export default class Player {
     player: PIXI.AnimatedSprite;
 
     constructor(startPosition: {x: number, y: number}) {
-        const playerPictureArray = [playerImage1, playerImage2, playerImage3, playerImage4, playerImage5];
-        const playerTextureArray = playerPictureArray.map(pic => PIXI.Texture.from(pic));
+        const playerTextureArray = [playerImage1, playerImage2, playerImage3, playerImage4, playerImage5].map(pic => PIXI.Texture.from(pic));
         this.player = new PIXI.AnimatedSprite(playerTextureArray);
-        this.player.animationSpeed = 300;
+        this.player.animationSpeed = 3;
         this.player.height = 128;
         this.player.width = 128;
         this.player.angle = 90;
