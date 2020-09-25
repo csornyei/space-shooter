@@ -28,6 +28,9 @@ module.exports = {
             }
         ]
     },
+    resolve: {
+        extensions: ['.ts', '.js', '.tsx', '.jsx', '.json', '.png', '.jpg', '.html']
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: "./src/index.html",
