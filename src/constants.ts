@@ -5,6 +5,8 @@ export const SCREEN_SIZE = {
 
 export const MOVE_SPEED = 5;
 
+export const ROCKET_SPEED = {x: 8, y: 0};
+
 export const ENEMY_SPEED = {
     x: {
         max: 4,

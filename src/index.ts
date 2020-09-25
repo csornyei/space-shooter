@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import backgroundImage from './assets/background.jpg';
 import Player from './Player';
 import Rocket from './Rocket';
-import {SCREEN_SIZE, MOVE_SPEED} from './constants';
+import {SCREEN_SIZE, MOVE_SPEED, ROCKET_SPEED} from './constants';
 import Enemy from './Enemy';
 
 
@@ -38,12 +38,12 @@ app.stage.addChild(backgroundSprite);
 
 const player = new Player({x: app.view.height / 2, y: app.view.width / 2});
 
-app.stage.addChild(player.player);
+app.stage.addChild(player.sprite);
 
 const fireRocket = () => {
     const newRocket = player.fireRocket();
     rockets.push(newRocket);
-    app.stage.addChild(newRocket.rocket);
+    app.stage.addChild(newRocket.sprite);
 }
 
 app.stage.interactive = true;
@@ -53,10 +53,10 @@ app.stage.on('pointerdown', fireRocket);
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
-setInterval(() => {
+const enemySpawnerInterval = setInterval(() => {
     const enemy = new Enemy();
     enemies.push(enemy);
-    app.stage.addChild(enemy.enemy);
+    app.stage.addChild(enemy.sprite);
     enemies.forEach((enemy) => {
         enemy.changeDirection();
     })
@@ -84,7 +84,7 @@ const keyboardActions = () => {
     if (pressedKeys['d'] || pressedKeys['ArrowRight']) {
         vector.x += MOVE_SPEED;
     }
-    player.movePlayer(vector);
+    player.move(vector);
     if (pressedKeys[' ']) {
         if (!shootWithSpace) {
             fireRocket();
@@ -95,9 +95,9 @@ const keyboardActions = () => {
 
 const rocketHandler = (delta: any) => {
     rockets.forEach((rocket, idx) => {
-        rocket.move();
-        if (rocket.rocket.x > SCREEN_SIZE.width) {
-            app.stage.removeChild(rocket.rocket);
+        rocket.move(ROCKET_SPEED);
+        if (rocket.sprite.x > SCREEN_SIZE.width) {
+            app.stage.removeChild(rocket.sprite);
             rockets.splice(idx, 1);
         }
     });
@@ -106,8 +106,30 @@ const rocketHandler = (delta: any) => {
 const enemyHandler = (delta: number) => {
     enemies.forEach((enemy, idx) => {
         enemy.move();
-        if (enemy.enemy.x < 0) {
-            app.stage.removeChild(enemy.enemy);
+
+        if (enemy.isColliding(player.sprite)) {
+            if (player.alive) {
+                enemy.alive = false;
+            }
+            player.alive = false;
+            clearInterval(enemySpawnerInterval);
+            app.stage.removeChild(player.sprite);
+        }
+        rockets.some((rocket, rocketIdx) => {
+            if (enemy.isColliding(rocket.sprite)) {
+                enemy.alive = false;
+                app.stage.removeChild(rocket.sprite);
+                rockets.splice(rocketIdx, 1);
+                return;
+            }
+            return;
+        });
+
+        if (enemy.sprite.x < 0) {
+            enemy.alive = false;
+        }
+        if (!enemy.alive) {
+            app.stage.removeChild(enemy.sprite);
             enemies.splice(idx, 1);
         }
     })

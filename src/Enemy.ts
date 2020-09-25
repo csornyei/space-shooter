@@ -1,33 +1,24 @@
 import * as PIXI from 'pixi.js';
-import Enemy1 from './assets/enemy/1.png';
-import Enemy2 from './assets/enemy/2.png';
-import Enemy3 from './assets/enemy/3.png';
-import Enemy4 from './assets/enemy/4.png';
-import Enemy5 from './assets/enemy/5.png';
-import Enemy6 from './assets/enemy/6.png';
-import Enemy7 from './assets/enemy/7.png';
-import Enemy8 from './assets/enemy/8.png';
+import EnemyImage from './assets/enemy.png';
 import { SCREEN_SIZE, ENEMY_SPEED, GAME_AREA_BORDER } from './constants';
+import Ship from './Ship';
 import { getRandom } from './utils';
 
-export default class Enemy {
-    enemy: PIXI.AnimatedSprite;
+export default class Enemy extends Ship {
     // x should be always positive, as enemies move from right to left
     movementVector: {x: number, y: number};
 
     constructor() {
-        const enemyTextures = [Enemy1, Enemy2, Enemy3, Enemy4, Enemy5, Enemy6, Enemy7, Enemy8].map(pic => PIXI.Texture.from(pic));
-        this.enemy = new PIXI.AnimatedSprite(enemyTextures);
-        this.enemy.anchor.set(.5);
-        this.enemy.width = 100;
-        this.enemy.height = 100;
-        this.enemy.x = SCREEN_SIZE.width;
-        this.enemy.y = getRandom(GAME_AREA_BORDER, SCREEN_SIZE.height - GAME_AREA_BORDER);
+        super(EnemyImage);
+        this.sprite.width = 100;
+        this.sprite.height = 100;
+        this.sprite.x = SCREEN_SIZE.width;
+        this.sprite.y = getRandom(GAME_AREA_BORDER, SCREEN_SIZE.height - GAME_AREA_BORDER);
         this.movementVector = {x: 5, y: 0};
     }
 
     calculateAngle() {
-        this.enemy.angle = -90 - (Math.atan(this.movementVector.y / this.movementVector.x) * 180/Math.PI);
+        this.sprite.angle = -90 - (Math.atan(this.movementVector.y / this.movementVector.x) * 180/Math.PI);
     }
 
     changeDirection() {
@@ -36,15 +27,27 @@ export default class Enemy {
     }
 
     move() {
-        this.enemy.position.x -= this.movementVector.x;
-        this.enemy.position.y += this.movementVector.y;
-        if (this.enemy.position.y < GAME_AREA_BORDER) {
+        this.sprite.position.x -= this.movementVector.x;
+        this.sprite.position.y += this.movementVector.y;
+        if (this.sprite.position.y < GAME_AREA_BORDER) {
             this.movementVector = {...this.movementVector, y: Math.abs(this.movementVector.y)}
             this.calculateAngle()
         }
-        if (this.enemy.position.y > SCREEN_SIZE.height - GAME_AREA_BORDER) {
+        if (this.sprite.position.y > SCREEN_SIZE.height - GAME_AREA_BORDER) {
             this.movementVector = {...this.movementVector, y: -1 * Math.abs(this.movementVector.y)}
             this.calculateAngle()
         }
+    }
+
+    isColliding(collider: PIXI.Sprite | PIXI.AnimatedSprite) {
+
+        const CORRECTION = 30;
+
+        return (
+            collider.x + collider.width > this.sprite.x + CORRECTION &&
+            collider.x < this.sprite.x + this.sprite.width &&
+            collider.y + collider.height > this.sprite.y &&
+            collider.y < this.sprite.y + this.sprite.height
+            )
     }
 }
