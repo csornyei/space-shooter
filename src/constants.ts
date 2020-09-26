@@ -16,6 +16,17 @@ export const ENEMY_SPEED = {
         max: 4,
         min: -4
     }
+};
+
+export const MAIN_MENU_STARS = {
+    STAR_DENSITY: 50,
+    STAR_FADE_OUT_CHANCE: 0.7,
+    STAR_FADE_OUT_AMOUNT: 0.07,
+}
+
+export const BUTTON_SIZE = {
+    width: 200,
+        height: 50
 }
 
 export const GAME_AREA_BORDER = 50;
