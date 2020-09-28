@@ -3,8 +3,9 @@ export const SCREEN_SIZE = {
     height: 600
 };
 
+
 export const SPLASH_SCREEN_FADE_OUT = {
-    total: 100,
+    total: 2000,
     speed: 100,
 };
 
@@ -30,6 +31,8 @@ export const MAIN_MENU_STARS = {
     STAR_FADE_OUT_CHANCE: 0.7,
     STAR_FADE_OUT_AMOUNT: 0.07,
 }
+
+export const BUTTON_TEXTS = ['GAME 1', 'GAME 2', 'GAME 3', 'EXIT'] as const;
 
 export const BUTTON_SIZE = {
     width: 200,

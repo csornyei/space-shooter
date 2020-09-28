@@ -40,9 +40,7 @@ export default class Enemy extends Ship {
     }
 
     isColliding(collider: PIXI.Sprite | PIXI.AnimatedSprite) {
-
         const CORRECTION = 30;
-
         return (
             collider.x + collider.width > this.sprite.x + CORRECTION &&
             collider.x < this.sprite.x + this.sprite.width &&
