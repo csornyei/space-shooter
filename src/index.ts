@@ -1,10 +1,12 @@
 import * as PIXI from 'pixi.js';
-import backgroundImage from './assets/background.jpg';
+import backBgImage from './assets/background_back.jpg';
+import middleBgImage from './assets/background_middle.png';
+import frontBgImage from './assets/background_front.png';
 import splashScreenImage from './assets/splashScreen.png';
 import logoImage from './assets/logo.png';
 import Player from './Player';
 import Rocket from './Rocket';
-import {SCREEN_SIZE, MOVE_SPEED, ROCKET_SPEED, MAIN_MENU_STARS, BUTTON_SIZE} from './constants';
+import {SCREEN_SIZE, MOVE_SPEED, ROCKET_SPEED, MAIN_MENU_STARS, BUTTON_SIZE, SPLASH_SCREEN_FADE_OUT, BACKGROUND_SPEED} from './constants';
 import Enemy from './Enemy';
 import { getRandom } from './utils';
 
@@ -19,10 +21,18 @@ const pressedKeys: {[key: string]: boolean} = {};
 const rockets: Rocket[] = [];
 const enemies: Enemy[] = [];
 let shootWithSpace = false;
+let isGameRunning = false;
 let mainMenuInterval: NodeJS.Timeout;
+
+// TODO - enemies are too fast in 2nd game
 
 const game = () => {
     setup();
+    app.loader
+        .add('bgBack', backBgImage)
+        .add('bgMiddle', middleBgImage)
+        .add('bgFront', frontBgImage);
+    app.loader.load();
     const splashScreen = getSplashScreen();
     app.stage.addChild(splashScreen);
     mainMenu = createMainMenu();
@@ -37,8 +47,8 @@ const game = () => {
                 app.stage.removeChild(splashScreen);
                 clearInterval(fadeOutInterval);
             }
-        }, 100)
-    }, 2000);
+        }, SPLASH_SCREEN_FADE_OUT.speed)
+    }, SPLASH_SCREEN_FADE_OUT.total);
 }
 
 const setup = () => {
@@ -165,35 +175,39 @@ const createButton = (previouseElement: number, text: string) => {
 
 const startGame = () => {
     app.stage.removeChild(mainMenu);
-    const backgroundSprite = createBackground()
-    app.stage.addChild(backgroundSprite);
+    isGameRunning = true;
+    const backgroundSprite = createBackground();
+    let bgX = 0;
     const player = new Player({x: SCREEN_SIZE.height / 2, y: SCREEN_SIZE.width / 2});
     app.stage.addChild(player.sprite);
 
     const fireRocket = () => {
-        const newRocket = player.fireRocket();
-        rockets.push(newRocket);
-        app.stage.addChild(newRocket.sprite);
+        if (isGameRunning) {
+            const newRocket = player.fireRocket();
+            rockets.push(newRocket);
+            app.stage.addChild(newRocket.sprite);
+        }
     }
 
     app.stage.on('pointermove', (e: PIXI.InteractionEvent) => player.followMouse(e));
     app.stage.on('pointerdown', fireRocket);
 
     const enemySpawnerInterval = setInterval(() => {
-        const enemy = new Enemy();
-        enemies.push(enemy);
-        app.stage.addChild(enemy.sprite);
-        enemies.forEach((enemy) => {
-            enemy.changeDirection();
-        })
+        if (isGameRunning) {
+            const enemy = new Enemy();
+            enemies.push(enemy);
+            app.stage.addChild(enemy.sprite);
+            enemies.forEach((enemy) => {
+                enemy.changeDirection();
+            })
+        }
     }, 2000);
 
     const moveBg = () => {
-        if (backgroundSprite.x < (backgroundSprite.texture.width - appSettings.width) * -1) {
-            backgroundSprite.x = 0;
-        } else {
-            backgroundSprite.x -= .5;
-        }
+        bgX -= BACKGROUND_SPEED;
+        backgroundSprite.front.tilePosition.x = bgX;
+        backgroundSprite.mid.tilePosition.x = bgX / 2;
+        backgroundSprite.back.tilePosition.x = bgX / 4;
     }
 
     const keyboardActions = () => {
@@ -238,6 +252,7 @@ const startGame = () => {
                     enemy.alive = false;
                 }
                 player.alive = false;
+                isGameRunning = false;
                 clearInterval(enemySpawnerInterval);
                 app.stage.removeChild(player.sprite);
                 app.stage.removeChildren();
@@ -270,10 +285,23 @@ const startGame = () => {
 }
 
 const createBackground = () => {
-    const backgroundSprite = new PIXI.Sprite(PIXI.Texture.from(backgroundImage));
-    backgroundSprite.x = 0;
-    backgroundSprite.y = 0;
-    return backgroundSprite
+    const bgBack = createBg(app.loader.resources['bgBack'].texture);
+    const bgMiddle = createBg(app.loader.resources['bgMiddle'].texture);
+    const bgFront = createBg(app.loader.resources['bgFront'].texture);
+
+    return {
+        back: bgBack,
+        mid: bgMiddle,
+        front: bgFront
+    };
+}
+
+const createBg = (texture: PIXI.Texture) => {
+    let tiling = new PIXI.TilingSprite(texture, 800, 600);
+    tiling.position.set(0,0);
+
+    app.stage.addChild(tiling);
+    return tiling;
 }
 
 const keyDown = (e: KeyboardEvent) => {
@@ -291,4 +319,3 @@ window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
 game();
-// startGame();

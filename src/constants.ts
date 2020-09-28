@@ -3,6 +3,13 @@ export const SCREEN_SIZE = {
     height: 600
 };
 
+export const SPLASH_SCREEN_FADE_OUT = {
+    total: 100,
+    speed: 100,
+};
+
+export const BACKGROUND_SPEED = 5;
+
 export const MOVE_SPEED = 5;
 
 export const ROCKET_SPEED = {x: 8, y: 0};
