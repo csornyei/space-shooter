@@ -10,15 +10,15 @@ export default class Enemy extends Ship {
 
     constructor() {
         super(EnemyImage);
-        this.sprite.width = 100;
-        this.sprite.height = 100;
-        this.sprite.x = SCREEN_SIZE.width;
-        this.sprite.y = getRandom(GAME_AREA_BORDER, SCREEN_SIZE.height - GAME_AREA_BORDER);
+        this.width = 100;
+        this.height = 100;
+        this.x = SCREEN_SIZE.width;
+        this.y = getRandom(GAME_AREA_BORDER, SCREEN_SIZE.height - GAME_AREA_BORDER);
         this.movementVector = {x: 5, y: 0};
     }
 
     calculateAngle() {
-        this.sprite.angle = -90 - (Math.atan(this.movementVector.y / this.movementVector.x) * 180/Math.PI);
+        this.angle = -90 - (Math.atan(this.movementVector.y / this.movementVector.x) * 180/Math.PI);
     }
 
     changeDirection() {
@@ -27,13 +27,13 @@ export default class Enemy extends Ship {
     }
 
     move() {
-        this.sprite.position.x -= this.movementVector.x;
-        this.sprite.position.y += this.movementVector.y;
-        if (this.sprite.position.y < GAME_AREA_BORDER) {
+        this.position.x -= this.movementVector.x;
+        this.position.y += this.movementVector.y;
+        if (this.position.y < GAME_AREA_BORDER) {
             this.movementVector = {...this.movementVector, y: Math.abs(this.movementVector.y)}
             this.calculateAngle()
         }
-        if (this.sprite.position.y > SCREEN_SIZE.height - GAME_AREA_BORDER) {
+        if (this.position.y > SCREEN_SIZE.height - GAME_AREA_BORDER) {
             this.movementVector = {...this.movementVector, y: -1 * Math.abs(this.movementVector.y)}
             this.calculateAngle()
         }
@@ -42,10 +42,10 @@ export default class Enemy extends Ship {
     isColliding(collider: PIXI.Sprite | PIXI.AnimatedSprite) {
         const CORRECTION = 30;
         return (
-            collider.x + collider.width > this.sprite.x + CORRECTION &&
-            collider.x < this.sprite.x + this.sprite.width &&
-            collider.y + collider.height > this.sprite.y &&
-            collider.y < this.sprite.y + this.sprite.height
+            collider.x + collider.width > this.x + CORRECTION &&
+            collider.x < this.x + this.width &&
+            collider.y + collider.height > this.y &&
+            collider.y < this.y + this.height
             )
     }
 }

@@ -82,12 +82,14 @@ const startGame = () => {
     const backgroundSprite = createBackground(gameContainer);
     let bgX = 0;
     const player = new Player({x: SCREEN_SIZE.height / 2, y: SCREEN_SIZE.width / 2});
-    gameContainer.addChild(player.sprite);
+    gameContainer.addChild(player);
+    const enemyContainer = new PIXI.Container();
+    gameContainer.addChild(enemyContainer);
 
     const fireRocket = () => {
             const newRocket = player.fireRocket();
             rockets.push(newRocket);
-            gameContainer.addChild(newRocket.sprite);
+            gameContainer.addChild(newRocket);
     }
 
     app.stage.on('pointermove', (e: PIXI.InteractionEvent) => player.followMouse(e));
@@ -95,7 +97,7 @@ const startGame = () => {
     const enemySpawnerInterval = setInterval(() => {
         const enemy = new Enemy();
         enemies.push(enemy);
-        gameContainer.addChild(enemy.sprite);
+        enemyContainer.addChild(enemy);
         enemies.forEach((enemy) => {
             enemy.changeDirection();
         })
@@ -144,19 +146,19 @@ const startGame = () => {
     const rocketHandler = () => {
         rockets.forEach((rocket, idx) => {
             rocket.move(ROCKET_SPEED);
-            if (rocket.sprite.x > SCREEN_SIZE.width) {
-                gameContainer.removeChild(rocket.sprite);
+            if (rocket.x > SCREEN_SIZE.width) {
+                gameContainer.removeChild(rocket);
                 rockets.splice(idx, 1);
             }
         });
     }
 
     const enemyHandler = () => {
-        enemies.forEach((enemy, idx) => {
-            console.log(`${idx} is moving`);
+        enemyContainer.children.forEach((children, idx) => {
+            const enemy = children as Enemy;
             enemy.move();
 
-            if (enemy.isColliding(player.sprite)) {
+            if (enemy.isColliding(player)) {
                 if (enemy.alive) {
                     if (player.alive) {
                         enemy.alive = false;
@@ -169,27 +171,29 @@ const startGame = () => {
                         }, 200);
                     })
                     shipExplode(enemy).then(() => {
-                        gameContainer.removeChild(enemy.sprite);
+                        enemyContainer.removeChild(enemy);
                         enemies.splice(idx, 1);
                     })
                 }
             }
             rockets.some((rocket, rocketIdx) => {
-                if (enemy.isColliding(rocket.sprite)) {
+                if (enemy.isColliding(rocket)) {
                     enemy.alive = false;
                     shipExplode(enemy).then(() => {
-                        gameContainer.removeChild(enemy.sprite);
+                        enemyContainer.removeChild(enemy);
                         enemies.splice(idx, 1);
                     })
-                    gameContainer.removeChild(rocket.sprite);
+                    gameContainer.removeChild(rocket);
                     rockets.splice(rocketIdx, 1);
                     return;
                 }
                 return;
             });
 
-            if (enemy.sprite.x < 0) {
+            if (enemy.x < 0) {
                 enemy.alive = false;
+                enemyContainer.removeChild(enemy);
+                enemies.splice(idx, 1);
             }
         })
     }

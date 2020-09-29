@@ -18,19 +18,18 @@ import explosion14 from './assets/explosion/1_14.png';
 import explosion15 from './assets/explosion/1_15.png';
 import explosion16 from './assets/explosion/1_16.png';
 
-export default class Ship {
-    sprite: PIXI.Sprite;
+export default class Ship extends PIXI.Sprite {
     alive: boolean;
 
     constructor(image: any) {
-        this.sprite = new PIXI.Sprite(PIXI.Texture.from(image));
+        super(PIXI.Texture.from(image));
         this.alive = true;
-        this.sprite.anchor.set(.5);
+        this.anchor.set(.5);
     }
 
     move(vector: {x: number, y: number}) {
-        this.sprite.position.x += vector.x;
-        this.sprite.position.y += vector.y;
+        this.position.x += vector.x;
+        this.position.y += vector.y;
     }
 
     explode(container: PIXI.Container) {
@@ -112,8 +111,8 @@ export default class Ship {
             emitterLifetime: 0.31,
             maxParticles: 10,
             pos: {
-                x: this.sprite.position.x,
-                y: this.sprite.position.y
+                x: this.position.x,
+                y: this.position.y
             },
             addAtBack: false,
             spawnType: "circle",
